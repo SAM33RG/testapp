@@ -2,6 +2,8 @@ package com.atsera.testapp
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -18,12 +20,20 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import java.io.File
+import id.zelory.compressor.Compressor
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+
 
 class MainActivity : AppCompatActivity(), LifecycleOwner {
 
     private val REQUEST_CODE_PERMISSIONS = 10
 
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+
+    private var compressedImage: File? = null
+
 
 
 
@@ -46,6 +56,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
             updateTransform()
         }
     }
+
 
     private lateinit var viewFinder: TextureView
 
@@ -94,8 +105,17 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
                     }
 
                     override fun onImageSaved(file: File) {
-                        val msg = "Photo capture succeeded: ${file.absolutePath}"
+                        val msg = "Photo capture succeeded: ${file.path}"
                         Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+
+                        val straem = File(file.absolutePath)
+
+                        val compressedImgFile =  Compressor(applicationContext).setMaxWidth(640)
+                            .setMaxHeight(480)
+                            .setCompressFormat(Bitmap.CompressFormat.WEBP)
+                            .setDestinationDirectoryPath(file.parent+"/compressed")
+                            .setQuality(75).compressToFile(straem)
+
                         Log.d("CameraXApp", msg)
                     }
                 })
