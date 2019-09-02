@@ -2,10 +2,12 @@ package com.atsera.testapp
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.net.Uri
 import android.opengl.Visibility
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -26,6 +28,8 @@ import androidx.camera.core.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.atsera.testapp.Login.Login
+import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.FirebaseError
@@ -36,6 +40,9 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import java.io.File
 import id.zelory.compressor.Compressor
 import io.reactivex.internal.util.HalfSerializer.onComplete
@@ -43,6 +50,7 @@ import org.w3c.dom.Comment
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -64,6 +72,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     lateinit var user:User;
 
 
+
     var path: String = ""
 
     private val picture = false
@@ -77,11 +86,18 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     private var storedVerificationId: String? = ""
     private lateinit var resendToken: PhoneAuthProvider.ForceResendingToken
 
+    private var firebaseStore: FirebaseStorage? = null
+    private var storageReference: StorageReference? = null
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        firebaseStore = FirebaseStorage.getInstance()
+        storageReference = FirebaseStorage.getInstance().reference
+
 
         parentView = findViewById(android.R.id.content) as View
 
@@ -218,17 +234,73 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         mAuth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
+
                     Log.d(TAG, "signInWithCredential:success")
+
                     database.reference.child("profile").push().setValue(user)
 
+
+                        val uripath = Uri.parse("file://"+path)
+
+                        val ref = storageReference?.child("uploads/" + UUID.randomUUID().toString())
+                        val uploadTask = ref?.putFile(uripath)
+
+                        val urlTask = uploadTask?.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
+                            if (!task.isSuccessful) {
+                                task.exception?.let {
+                                    throw it
+                                }
+                            }
+                            return@Continuation ref.downloadUrl
+                        })?.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val downloadUri = task.result
+
+                                var s = task.result?.encodedPath.toString()
+                                val myRef = database.getReference("profile")
+
+                                myRef.orderByChild("number").equalTo(phoneNumber.text.toString())
+                                    .addListenerForSingleValueEvent(object : ValueEventListener{
+                                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                            if(dataSnapshot.exists()){
+                                                dataSnapshot.children.forEach {
+
+                                                    it.ref.child("url").setValue(s)
+
+                                                    val intent = Intent(this@MainActivity, Login::class.java)
+                                                    var user =it.getValue() as MutableMap<String, Any>
+                                                    var count = user.get("visit_count").toString().toInt()
+                                                    intent.putExtra("count",count)
+                                                    startActivity(intent)
+
+                                                }
+                                            }
+                                        }
+                                        override fun onCancelled(p0: DatabaseError) {
+
+                                        }
+                                    })
+                                Snackbar.make(parentView, "Upload Completed",
+                                    Snackbar.LENGTH_SHORT).show()
+                            } else {
+                                // Handle failures
+                                Snackbar.make(parentView, "Upload Failed try again",
+                                    Snackbar.LENGTH_SHORT).show()
+                            }
+                        }?.addOnFailureListener{
+
+                        }
+
+
+
                     val user = task.result?.user
-                    // ...
                 } else {
                     // Sign in failed, display a message and update the UI
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
                     if (task.exception is FirebaseAuthInvalidCredentialsException) {
                         // The verification code entered was invalid
+                        Snackbar.make(parentView, "Wrong code",
+                            Snackbar.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -247,21 +319,22 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
             return
         }
 
-        val numberQuery = database.getReference("profile").child(phoneNumber.text.toString())
 
         myRef.orderByChild("number").equalTo(phoneNumber.text.toString())
             .addListenerForSingleValueEvent(object : ValueEventListener{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if(dataSnapshot.exists()){
                         dataSnapshot.children.forEach {
-                            //var sp = it.getValue(Comment::class.java)
                             Toast.makeText(applicationContext,"exist", Toast.LENGTH_SHORT).show()
-                           // var count = dataSnapshot.getValue(User.class)
-                            //count = count + 1
-                            //dataSnapshot.getRef().child("visit_count").setValue(count)
+
                             var user =it.getValue() as MutableMap<String, Any>
                             var count = user.get("visit_count").toString().toInt() + 1
                             it.ref.child("visit_count").setValue(count)
+
+                            val intent = Intent(this@MainActivity, Login::class.java)
+                            
+                            intent.putExtra("count",count)
+                            startActivity(intent)
 
                         }
                     }else{
@@ -273,11 +346,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
 
                         getOTP.performClick()
 
-
-                        user = User(phoneNumber.text.toString(), 1)
-
-
-
+                        user = User(phoneNumber.text.toString(), 1, "")
 
                     }
                 }
