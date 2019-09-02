@@ -332,7 +332,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
                             it.ref.child("visit_count").setValue(count)
 
                             val intent = Intent(this@MainActivity, Login::class.java)
-                            
+
                             intent.putExtra("count",count)
                             startActivity(intent)
 
