@@ -18,7 +18,6 @@ class Login : AppCompatActivity() {
 
     private val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private  val TAG: String = "login: "
-    private var verificationInProgress = false
     private var storedVerificationId: String? = ""
     private lateinit var resendToken: PhoneAuthProvider.ForceResendingToken
 
