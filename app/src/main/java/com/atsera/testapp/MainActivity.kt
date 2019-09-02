@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.opengl.Visibility
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -12,15 +13,25 @@ import android.util.Rational
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.annotation.NonNull
 import androidx.camera.core.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.tasks.Task
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.FirebaseError
+import com.google.firebase.database.*
 import java.io.File
 import id.zelory.compressor.Compressor
+import io.reactivex.internal.util.HalfSerializer.onComplete
+import org.w3c.dom.Comment
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -32,9 +43,17 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
 
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
-    private var compressedImage: File? = null
+    var btnStage: Int = 0
 
+    lateinit var mainBtn: Button
+    lateinit var cameraLayout:View
+    lateinit var phoneNumber:EditText
 
+    var path: String = ""
+
+    private val picture = false
+
+    val database: FirebaseDatabase = FirebaseDatabase.getInstance();
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +74,77 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         viewFinder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             updateTransform()
         }
+
+         mainBtn = findViewById<Button>(R.id.main_btn)
+
+        cameraLayout = findViewById<View>(R.id.capture_image_layout)
+
+        phoneNumber = findViewById<EditText>(R.id.phone_number)
+
+
+
+        mainBtn.setOnClickListener {
+
+            if(btnStage == 0){
+                cameraLayout.visibility = View.VISIBLE
+                btnStage = 1
+                mainBtn.visibility = View.GONE
+            }else if (btnStage==1){
+
+            }
+        }
+
+
+    }
+
+    private fun checkNumber(){
+        val myRef = database.getReference("profile")
+
+        if(phoneNumber.text == null || phoneNumber.text.toString().length != 10){
+            mainBtn.visibility = View.VISIBLE
+            Snackbar.make(findViewById(android.R.id.content), "Number Incorrect",
+                Snackbar.LENGTH_SHORT).show()
+            return
+        }
+
+        val numberQuery = database.getReference("profile").child(phoneNumber.text.toString())
+
+        myRef.orderByChild("number").equalTo(phoneNumber.text.toString())
+            .addListenerForSingleValueEvent(object : ValueEventListener{
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if(dataSnapshot.exists()){
+                        dataSnapshot.children.forEach {
+                            //var sp = it.getValue(Comment::class.java)
+                            Toast.makeText(applicationContext,"exist", Toast.LENGTH_SHORT).show()
+                           // var count = dataSnapshot.getValue(User.class)
+                            //count = count + 1
+                            //dataSnapshot.getRef().child("visit_count").setValue(count)
+                            var user =it.getValue() as MutableMap<String, Any>
+                            var count = user.get("visit_count").toString().toInt() + 1
+                            it.ref.child("visit_count").setValue(count)
+
+
+
+
+
+                        }
+                    }else{
+                        val user = User(phoneNumber.text.toString(), 1)
+
+
+                        database.reference.child("profile").push().setValue(user)
+
+                    }
+                }
+                override fun onCancelled(p0: DatabaseError) {
+
+                }
+            })
+
+
+
+
+
     }
 
 
@@ -115,6 +205,10 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
                             .setCompressFormat(Bitmap.CompressFormat.WEBP)
                             .setDestinationDirectoryPath(file.parent+"/compressed")
                             .setQuality(75).compressToFile(straem)
+                        path = compressedImgFile.path
+                        cameraLayout.visibility = View.GONE
+
+                        checkNumber()
 
                         Log.d("CameraXApp", msg)
                     }

@@ -3,7 +3,6 @@ package com.atsera.testapp.Login
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import com.atsera.testapp.R
@@ -29,10 +28,10 @@ class Login : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(com.atsera.testapp.R.layout.activity_login)
 
-        var number = findViewById(R.id.login_number) as EditText
+        var number = findViewById(R.id.phone_number) as EditText
         var otp = findViewById(R.id.login_otp) as EditText
 
-        var getOTP = findViewById(R.id.login_get_otp) as Button
+        var getOTP = findViewById(R.id.main_btn) as Button
         var submit = findViewById(R.id.login_login) as Button
 
         var callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
