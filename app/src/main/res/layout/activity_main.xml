@@ -18,46 +18,116 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" android:id="@+id/login_layout"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="32dp">
+
 
                 <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
                         android:inputType="number|textPersonName"
-                        android:ems="10"
                         android:id="@+id/phone_number"
-                        android:layout_marginTop="8dp"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:hint="Number" android:layout_marginStart="8dp"
-                        app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
+                        android:hint="Number"
+                        android:textColor="@color/colorPrimary"
+                        android:background="@drawable/edittxt_style"
+                        android:paddingStart="12dp"
+                        android:paddingTop="5dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="5dp"
+                        android:layout_marginStart="32dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="32dp"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"/>
                 <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
                         android:inputType="textPersonName"
-                        android:ems="10"
                         android:id="@+id/login_otp"
-                        android:layout_marginTop="8dp"
                         app:layout_constraintTop_toBottomOf="@+id/phone_number"
-                        android:hint="OTP" android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginStart="8dp" app:layout_constraintStart_toStartOf="parent"
+
+                        android:textColor="@color/colorPrimary"
+                        android:background="@drawable/edittxt_style"
+                        android:paddingStart="12dp"
+                        android:paddingTop="5dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="5dp"
+                        android:layout_marginStart="32dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="32dp"
+
+
+                        android:hint="OTP"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
                         android:visibility="gone"/>
+
+                <!--
                 <Button
+                        android:id="@+id/button"
+
+
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="250dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/button_style"
+                        android:fontFamily="@font/oswald"
+                        android:paddingStart="50dp"
+                        android:paddingEnd="50dp"
+                        android:textColor="@color/colorClear"
+                        android:textStyle="bold"
+
+                                                android:text="Login"
+
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                -->
+
+
+                <Button
+
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/button_style"
+                        android:fontFamily="@font/oswald"
+                        android:paddingStart="50dp"
+                        android:paddingEnd="50dp"
+                        android:textColor="@color/colorClear"
+                        android:textStyle="bold"
+
                         android:text="Click photo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/main_btn"
-                        app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
-                        app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-                        android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/login_otp"/>
+                        android:id="@+id/main_btn"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/login_otp" android:visibility="visible"/>
                 <Button
-                        android:text="Button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/senotp"
-                        android:layout_marginTop="8dp"
+
+
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/button_style"
+                        android:fontFamily="@font/oswald"
+                        android:paddingStart="50dp"
+                        android:paddingEnd="50dp"
+                        android:textColor="@color/colorClear"
+                        android:textStyle="bold"
+
+
+                        android:text="Send OTP"
+                        android:id="@+id/senotp"
                         app:layout_constraintTop_toBottomOf="@+id/main_btn"
-                        app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
-                        app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-                        android:visibility="gone"/>
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:visibility="gone" tools:visibility="gone"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -69,6 +139,46 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintTop_toBottomOf="@+id/login_layout" android:layout_marginTop="16dp">
+                <!--
+
+                <EditText
+                        android:id="@+id/password"
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginTop="190dp"
+                        android:layout_marginEnd="24dp"
+                        android:background="@drawable/edittxt_style"
+                        android:hint="Password"
+                        android:inputType="textPassword"
+                        android:paddingStart="12dp"
+                        android:paddingTop="5dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="5dp"
+                        android:textColor="@color/colorPrimary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                <Button
+                        android:id="@+id/button"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="250dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/button_style"
+                        android:fontFamily="@font/oswald"
+                        android:paddingStart="50dp"
+                        android:paddingEnd="50dp"
+                        android:text="Login"
+                        android:textColor="@color/colorClear"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                        -->
 
                 <TextureView
                         android:id="@+id/view_finder"
@@ -80,6 +190,8 @@
                         app:layout_constraintTop_toTopOf="parent"/>
                 <ImageButton
                         android:id="@+id/capture_button"
+                        android:background="@drawable/button_style"
+
                         android:layout_width="72dp"
                         android:layout_height="72dp"
                         android:layout_margin="24dp"

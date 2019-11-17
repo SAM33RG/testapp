@@ -18,6 +18,7 @@ import android.view.Surface
 import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -31,6 +32,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.atsera.testapp.Login.Login
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
+import com.google.android.material.animation.AnimationUtils
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.FirebaseError
 import com.google.firebase.FirebaseException
@@ -69,7 +71,9 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     lateinit var getOTP: Button
     lateinit var otp:EditText
 
-    lateinit var user:User;
+    lateinit var user:User
+
+    lateinit var anim: Animation
 
 
 
@@ -94,6 +98,8 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        anim = android.view.animation.AnimationUtils.loadAnimation(applicationContext, R.anim.main_anim)
 
         firebaseStore = FirebaseStorage.getInstance()
         storageReference = FirebaseStorage.getInstance().reference
@@ -133,12 +139,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         var callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                // This callback will be invoked in two situations:
-                // 1 - Instant verification. In some cases the phone number can be instantly
-                //     verified without needing to send or enter a verification code.
-                // 2 - Auto-retrieval. On some devices Google Play services can automatically
-                //     detect the incoming verification SMS and perform verification without
-                //     user action.
+
                 Log.d(TAG, "onVerificationCompleted:$credential")
 
                 signInWithPhoneAuthCredential(credential)
@@ -171,15 +172,12 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
                 verificationId: String,
                 token: PhoneAuthProvider.ForceResendingToken
             ) {
-                // The SMS verification code has been sent to the provided phone number, we
-                // now need to ask the user to enter the code and then construct a credential
-                // by combining the code with a verification ID.
-                Log.d(TAG, "onCodeSent:$verificationId")
+
 
                 // Save verification ID and resending token so we can use them latevr
                 storedVerificationId = verificationId
                 resendToken = token
-
+995
                 Snackbar.make(findViewById(android.R.id.content), "Code sent!",
                     Snackbar.LENGTH_SHORT).show()
             }
@@ -187,6 +185,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
 
         getOTP.setOnClickListener{
             otp.visibility = View.VISIBLE
+            otp.startAnimation(anim)
 
 
                 PhoneAuthProvider.getInstance().verifyPhoneNumber(
@@ -208,11 +207,14 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
 
             if(btnStage == 0){
                 cameraLayout.visibility = View.VISIBLE
+                cameraLayout.startAnimation(anim)
                 btnStage = 1
                 mainBtn.visibility = View.GONE
             }else if (btnStage==1){
                 checkNumber()
             }else if(btnStage == 2){
+                Snackbar.make(parentView, "Veryfying....",
+                    Snackbar.LENGTH_SHORT).show()
                 verifyPhoneNumberWithCode(storedVerificationId, otp.text.toString())
 
             }
@@ -234,6 +236,9 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         mAuth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+
+                    Snackbar.make(parentView, "Uploading your picture please wait",
+                        Snackbar.LENGTH_SHORT).show()
 
                     Log.d(TAG, "signInWithCredential:success")
 
@@ -292,7 +297,6 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
                         }
 
 
-
                     val user = task.result?.user
                 } else {
                     // Sign in failed, display a message and update the UI
@@ -309,10 +313,13 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
 
 
     private fun checkNumber(){
+        Snackbar.make(parentView,"checking Number...", Snackbar.LENGTH_LONG).show()
+
         val myRef = database.getReference("profile")
 
         if(phoneNumber.text == null || phoneNumber.text.toString().length != 10){
             mainBtn.visibility = View.VISIBLE
+            mainBtn.startAnimation(anim)
             mainBtn.text = "Sumbit"
 
             Snackbar.make(parentView,"Number Incorrect", Snackbar.LENGTH_LONG).show()
@@ -341,6 +348,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
 
                         phoneNumber.isEnabled = false;
                         mainBtn.visibility = View.VISIBLE
+                        mainBtn.startAnimation(anim)
                         mainBtn.text = "Sumbit"
                         btnStage = 2
 
